@@ -109,6 +109,16 @@ namespace Microsoft.Data.Entity.Metadata.Builders
             return new ReferenceReferenceBuilder(Builder.ForeignKey(dependentEntityType, foreignKeyPropertyNames, ConfigurationSource.Explicit));
         }
 
+        public virtual ReferenceReferenceBuilder ForeignKey(
+            [NotNull] string dependentEntityTypeName,
+            [NotNull] params string[] foreignKeyPropertyNames)
+        {
+            Check.NotEmpty(dependentEntityTypeName, nameof(dependentEntityTypeName));
+            Check.NotNull(foreignKeyPropertyNames, nameof(foreignKeyPropertyNames));
+
+            return new ReferenceReferenceBuilder(Builder.ForeignKey(dependentEntityTypeName, foreignKeyPropertyNames, ConfigurationSource.Explicit));
+        }
+
         /// <summary>
         ///     Configures the unique property(s) that this relationship targets. Typically you would only call this
         ///     method if you want to use a property(s) other than the primary key as the principal property(s). If
@@ -131,6 +141,16 @@ namespace Microsoft.Data.Entity.Metadata.Builders
             return new ReferenceReferenceBuilder(Builder.PrincipalKey(principalEntityType, keyPropertyNames, ConfigurationSource.Explicit));
         }
 
+        public virtual ReferenceReferenceBuilder PrincipalKey(
+                    [NotNull] string principalEntityTypeName,
+                    [NotNull] params string[] keyPropertyNames)
+        {
+            Check.NotEmpty(principalEntityTypeName, nameof(principalEntityTypeName));
+            Check.NotNull(keyPropertyNames, nameof(keyPropertyNames));
+
+            return new ReferenceReferenceBuilder(Builder.PrincipalKey(principalEntityTypeName, keyPropertyNames, ConfigurationSource.Explicit));
+        }
+
         /// <summary>
         ///     Configures whether this is a required relationship (i.e. whether the foreign key property(s) can
         ///     be assigned null).
@@ -139,6 +159,9 @@ namespace Microsoft.Data.Entity.Metadata.Builders
         /// <returns> The same builder instance so that multiple configuration calls can be chained. </returns>
         public virtual ReferenceReferenceBuilder Required(bool required = true)
             => new ReferenceReferenceBuilder(Builder.Required(required, ConfigurationSource.Explicit));
+
+        public virtual ReferenceReferenceBuilder Unique(bool isUnique = true)
+            => new ReferenceReferenceBuilder(Builder.Unique(isUnique, ConfigurationSource.Explicit));
 
         private InternalRelationshipBuilder Builder => ((IAccessor<InternalRelationshipBuilder>)this).Service;
     }

@@ -29,7 +29,7 @@ namespace Microsoft.Data.Entity.Commands.Migrations
             Check.NotNull(model, nameof(model));
             Check.NotNull(stringBuilder, nameof(stringBuilder));
 
-            stringBuilder.Append("var builder = new BasicModelBuilder()");
+            stringBuilder.Append("var builder = new ModelBuilder(new ConventionSet())");
 
             using (stringBuilder.Indent())
             {
@@ -96,6 +96,8 @@ namespace Microsoft.Data.Entity.Commands.Migrations
                         GenerateProperties(entityType.GetProperties(), stringBuilder);
 
                         GenerateKey(entityType.GetPrimaryKey(), stringBuilder);
+
+                        GenerateIndexes(entityType.GetIndexes(), stringBuilder);
                     }
 
                     if ((options & GenerateEntityTypeOptions.Secondary) != 0)
@@ -156,7 +158,15 @@ namespace Microsoft.Data.Entity.Commands.Migrations
                         .AppendLine()
                         .Append(".GenerateValueOnAdd()");
                 }
-                else if (property.StoreGeneratedPattern != StoreGeneratedPattern.None)
+
+                if (property.IsNullable != property.ClrType.IsNullableType())
+                {
+                    stringBuilder
+                        .AppendLine()
+                        .Append(".Required()");
+                }
+
+                if (property.StoreGeneratedPattern != StoreGeneratedPattern.None)
                 {
                     stringBuilder
                         .AppendLine()
@@ -203,6 +213,46 @@ namespace Microsoft.Data.Entity.Commands.Migrations
             stringBuilder.Append(";");
         }
 
+        protected virtual void GenerateIndexes(
+            [NotNull] IEnumerable<IIndex> Indexes, [NotNull] IndentedStringBuilder stringBuilder)
+        {
+            Check.NotNull(Indexes, nameof(Indexes));
+            Check.NotNull(stringBuilder, nameof(stringBuilder));
+
+            foreach (var index in Indexes)
+            {
+                GenerateIndex(index, stringBuilder);
+            }
+        }
+
+        protected virtual void GenerateIndex(
+            [NotNull] IIndex index, [NotNull] IndentedStringBuilder stringBuilder)
+        {
+            Check.NotNull(index, nameof(index));
+            Check.NotNull(stringBuilder, nameof(stringBuilder));
+
+            stringBuilder
+                .AppendLine()
+                .Append("b.Index(")
+                .Append(string.Join(", ", index.Properties.Select(p => _code.Literal(p.Name))))
+                .Append(")");
+
+            using (stringBuilder.Indent())
+            {
+                if (index.IsUnique)
+                {
+                    stringBuilder
+                        .AppendLine()
+                        .Append(".Unique()");
+                }
+
+                GenerateAnnotations(index.Annotations.ToArray(), stringBuilder);
+            }
+
+            stringBuilder.Append(";");
+        }
+
+
         protected virtual void GenerateEntityTypeAnnotations([NotNull] IEntityType entityType, [NotNull] IndentedStringBuilder stringBuilder)
         {
             Check.NotNull(entityType, nameof(entityType));
@@ -244,13 +294,44 @@ namespace Microsoft.Data.Entity.Commands.Migrations
 
             stringBuilder
                 .AppendLine()
-                .Append("b.ForeignKey(")
+                .Append("b.Reference(")
                 .Append(_code.Literal(foreignKey.PrincipalEntityType.Name))
-                .Append(", ")
-                .Append(string.Join(", ", foreignKey.Properties.Select(p => _code.Literal(p.Name))))
-                .Append(")");
+                .Append(")")
+                .AppendLine();
 
-            GenerateForeignKeyAnnotations(foreignKey, stringBuilder);
+            using (stringBuilder.Indent())
+            {
+                stringBuilder
+                    .AppendLine(".InverseReference()")
+                    .Append(".ForeignKey(")
+                    .Append(_code.Literal(foreignKey.EntityType.Name))
+                    .Append(", ")
+                    .Append(string.Join(", ", foreignKey.Properties.Select(p => _code.Literal(p.Name))))
+                    .Append(")");
+
+                if (foreignKey.PrincipalKey != foreignKey.PrincipalEntityType.GetPrimaryKey())
+                {
+                    stringBuilder
+                        .AppendLine()
+                        .Append(".PrincipalKey(")
+                        .Append(_code.Literal(foreignKey.PrincipalEntityType.Name))
+                        .Append(", ")
+                        .Append(string.Join(", ", foreignKey.PrincipalKey.Properties.Select(p => _code.Literal(p.Name))))
+                        .Append(")");
+                }
+
+                using (stringBuilder.Indent())
+                {
+                    if (foreignKey.IsUnique)
+                    {
+                        stringBuilder
+                            .AppendLine()
+                            .Append(".Unique()");
+                    }
+                }
+
+                GenerateForeignKeyAnnotations(foreignKey, stringBuilder);
+            }
 
             stringBuilder.Append(";");
         }
