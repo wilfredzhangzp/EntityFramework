@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;CSPROJ</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -45,6 +45,15 @@
     <PackageReference Include="System.Data.Common">
       <TargetFramework>net45</TargetFramework>
     </PackageReference>
+    <PackageReference Include="Microsoft.Framework.ConfigurationModel">
+      <TargetFramework>net45</TargetFramework>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Framework.ConfigurationModel.Abstractions">
+      <TargetFramework>net45</TargetFramework>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Framework.ConfigurationModel.Json">
+      <TargetFramework>net45</TargetFramework>
+    </PackageReference>
     <PackageReference Include="Microsoft.Framework.DependencyInjection">
       <TargetFramework>net45</TargetFramework>
     </PackageReference>
@@ -55,6 +64,9 @@
       <TargetFramework>net45</TargetFramework>
     </PackageReference>
     <PackageReference Include="Microsoft.Framework.Logging.Abstractions">
+      <TargetFramework>net45</TargetFramework>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
       <TargetFramework>net45</TargetFramework>
     </PackageReference>
     <Reference Include="xunit.abstractions">
@@ -119,12 +131,14 @@
     <Compile Include="SqlServerEndToEndTest.cs" />
     <Compile Include="SentinelGraphUpdatesSqlServerTest.cs" />
     <Compile Include="MonsterFixupSqlServerTest.cs" />
+    <Compile Include="SqlServerTestConfiguration.cs" />
     <Compile Include="SqlServerTestStore.cs" />
     <Compile Include="StoreGeneratedSqlServerTestBase.cs" />
     <Compile Include="TransactionSqlServerFixture.cs" />
     <Compile Include="TransactionSqlServerTest.cs" />
     <Compile Include="TestModels\SqlServerNorthwindContext.cs" />
     <Compile Include="TestSqlServerModelSource.cs" />
+    <None Include="config.json" />
     <None Include="packages.config" />
     <None Include="project.json" />
   </ItemGroup>

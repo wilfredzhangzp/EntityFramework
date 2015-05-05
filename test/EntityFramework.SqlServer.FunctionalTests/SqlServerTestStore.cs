@@ -478,17 +478,7 @@ namespace Microsoft.Data.Entity.SqlServer.FunctionalTests
 
         public static string CreateConnectionString(string name)
         {
-            return new SqlConnectionStringBuilder
-                {
-                    DataSource = @"(localdb)\MSSQLLocalDB",
-                    // TODO: Currently nested queries are run while processing the results of outer queries
-                    // This either requires MARS or creation of a new connection for each query. Currently using
-                    // MARS since cloning connections is known to be problematic.
-                    MultipleActiveResultSets = true,
-                    InitialCatalog = name,
-                    IntegratedSecurity = true,
-                    ConnectTimeout = 30
-                }.ConnectionString;
+            return SqlServerTestConfiguration.ConnectionString(name);
         }
     }
 }
